@@ -11,6 +11,7 @@ import notify from 'gulp-notify'
 import sourcemaps from 'gulp-sourcemaps'
 import cssnano from 'cssnano'
 import autoprefixer from 'autoprefixer'
+import tailwindcss from 'tailwindcss'
 import postcss from 'gulp-postcss'
 
 import configLoader from '../helpers/config-loader'
