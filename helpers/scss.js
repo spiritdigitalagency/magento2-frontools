@@ -29,7 +29,12 @@ export default function(name, file) {
   const postcssConfig = []
   const disableSuffix = theme.disableSuffix || false
   const browserslist = configLoader('browserslist.json')
+  const tailwindConfig = configLoader('tailwind.config.json')
   const sassCompiler = configLoader('sass-compiler.json', false)
+  const themePath = projectPath + theme.dest.replace('pub/static', 'app/design')
+
+  // Set tailwindcss purge rules for production
+  tailwindConfig.purge[themePath]
 
   // Set Sass compiler to Dart Sass
   if (sassCompiler === 'dart-sass') {
@@ -42,6 +47,7 @@ export default function(name, file) {
     })
   }
   else {
+    postcssConfig.push(tailwindcss({ config: tailwindConfig }))
     postcssConfig.push(autoprefixer({ overrideBrowserslist: browserslist }))
   }
 
@@ -55,6 +61,7 @@ export default function(name, file) {
     return file
   }
 
+  dest.push(themePath + '/web')
   theme.locale.forEach(locale => {
     dest.push(path.join(projectPath, theme.dest, locale))
   })

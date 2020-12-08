@@ -2,13 +2,13 @@
   "name": "magento2-frontools",
   "version": "1.11.0",
   "author": {
-    "name": "Bartek Igielski",
-    "email": "igloczek@gmail.com"
+    "name": "Evangelos Pallis",
+    "email": "info.vpsnak@gmail.com"
   },
-  "private": true,
+  "private": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/SnowdogApps/magento2-frontools"
+    "url": "https://github.com/vpsnak/magento2-frontools"
   },
   "license": "MIT",
   "dependencies": {
