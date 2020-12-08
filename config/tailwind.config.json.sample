@@ -1,10 +1,10 @@
 {
-    purge: [],
-    theme: {
-        extend: {},
+    "purge": [],
+    "theme": {
+        "extend": {},
     },
-    variants: {
-        extend: {},
+    "variants": {
+        "extend": {},
     },
-    plugins: [],
+    "plugins": [],
 }

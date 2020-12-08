@@ -19,86 +19,86 @@ import sassError from './sass-error'
 import { env, themes, tempPath, projectPath, browserSyncInstances } from '../helpers/config'
 
 export default function(name, file) {
-  const theme = themes[name]
-  const srcBase = path.join(tempPath, theme.dest)
-  const stylesDir = theme.stylesDir ? theme.stylesDir : 'styles'
-  const dest = []
-  const disableMaps = env.disableMaps || false
-  const production = env.prod || false
-  const includePaths = theme.includePaths ? theme.includePaths : []
-  const postcssConfig = []
-  const disableSuffix = theme.disableSuffix || false
-  const browserslist = configLoader('browserslist.json')
-  const tailwindConfig = configLoader('tailwind.config.json')
-  const sassCompiler = configLoader('sass-compiler.json', false)
-  const themePath = projectPath + theme.dest.replace('pub/static', 'app/design')
+    const theme = themes[name]
+    const srcBase = path.join(tempPath, theme.dest)
+    const stylesDir = theme.stylesDir ? theme.stylesDir : 'styles'
+    const dest = []
+    const disableMaps = env.disableMaps || false
+    const production = env.prod || false
+    const includePaths = theme.includePaths ? theme.includePaths : []
+    const postcssConfig = []
+    const disableSuffix = theme.disableSuffix || false
+    const browserslist = configLoader('browserslist.json')
+    const sassCompiler = configLoader('sass-compiler.json', false)
+    const themePath = projectPath + theme.dest.replace('pub/static', 'app/design')
 
-  // Set tailwindcss purge rules for production
-  tailwindConfig.purge[themePath]
-
-  // Set Sass compiler to Dart Sass
-  if (sassCompiler === 'dart-sass') {
-    gulpSass.compiler = dartSass
-  }
-
-  if (theme.postcss) {
-    theme.postcss.forEach(el => {
-      postcssConfig.push(eval(el))
-    })
-  }
-  else {
-    postcssConfig.push(tailwindcss({ config: tailwindConfig }))
-    postcssConfig.push(autoprefixer({ overrideBrowserslist: browserslist }))
-  }
-
-  function adjustDestinationDirectory(file) {
-    if (file.dirname.startsWith(stylesDir)) {
-      file.dirname = file.dirname.replace(stylesDir, 'css')
+    // Set Sass compiler to Dart Sass
+    if (sassCompiler === 'dart-sass') {
+        gulpSass.compiler = dartSass
     }
-    else {
-      file.dirname = file.dirname.replace('/' + stylesDir, '')
+
+    if (theme.tailwindcss) {
+        const tailwindConfig = configLoader('tailwind.config.json')
+        tailwindConfig.purge[themePath]
+        postcssConfig.push(tailwindcss({ config: tailwindConfig }))
     }
-    return file
-  }
 
-  dest.push(themePath + '/web')
-  theme.locale.forEach(locale => {
-    dest.push(path.join(projectPath, theme.dest, locale))
-  })
-
-  const gulpTask = src( // eslint-disable-line one-var
-    file || srcBase + '/**/*.scss',
-    { base: srcBase }
-  )
-    .pipe(
-      gulpIf(
-        !env.ci,
-        plumber({
-          errorHandler: notify.onError('Error: <%= error.message %>')
+    if (theme.postcss) {
+        theme.postcss.forEach(el => {
+            postcssConfig.push(eval(el))
         })
-      )
-    )
-    .pipe(gulpIf(!disableMaps, sourcemaps.init()))
-    .pipe(gulpSass({ includePaths: includePaths }).on('error', sassError(env.ci || false)))
-    .pipe(gulpIf(production, postcss([cssnano()])))
-    .pipe(gulpIf(postcssConfig.length, postcss(postcssConfig || [])))
-    .pipe(gulpIf(production && !disableSuffix, rename({ suffix: '.min' })))
-    .pipe(gulpIf(!disableMaps, sourcemaps.write('.', { includeContent: true })))
-    .pipe(rename(adjustDestinationDirectory))
-    .pipe(multiDest(dest))
-    .pipe(logger({
-      display   : 'name',
-      beforeEach: 'Theme: ' + name + ' ',
-      afterEach : ' Compiled!'
-    }))
+    } else {
+        postcssConfig.push(autoprefixer({ overrideBrowserslist: browserslist }))
+    }
 
-  if (browserSyncInstances) {
-    Object.keys(browserSyncInstances).forEach(instanceKey => {
-      const instance = browserSyncInstances[instanceKey]
+    function adjustDestinationDirectory(file) {
+        if (file.dirname.startsWith(stylesDir)) {
+            file.dirname = file.dirname.replace(stylesDir, 'css')
+        }
+        else {
+            file.dirname = file.dirname.replace('/' + stylesDir, '')
+        }
+        return file
+    }
 
-      gulpTask.pipe(instance.stream())
+    dest.push(themePath + '/web')
+    theme.locale.forEach(locale => {
+        dest.push(path.join(projectPath, theme.dest, locale))
     })
-  }
 
-  return gulpTask
+    const gulpTask = src( // eslint-disable-line one-var
+        file || srcBase + '/**/*.scss',
+        { base: srcBase }
+    )
+        .pipe(
+            gulpIf(
+                !env.ci,
+                plumber({
+                    errorHandler: notify.onError('Error: <%= error.message %>')
+                })
+            )
+        )
+        .pipe(gulpIf(!disableMaps, sourcemaps.init()))
+        .pipe(gulpSass({ includePaths: includePaths }).on('error', sassError(env.ci || false)))
+        .pipe(gulpIf(production, postcss([cssnano()])))
+        .pipe(gulpIf(postcssConfig.length, postcss(postcssConfig || [])))
+        .pipe(gulpIf(production && !disableSuffix, rename({ suffix: '.min' })))
+        .pipe(gulpIf(!disableMaps, sourcemaps.write('.', { includeContent: true })))
+        .pipe(rename(adjustDestinationDirectory))
+        .pipe(multiDest(dest))
+        .pipe(logger({
+            display   : 'name',
+            beforeEach: 'Theme: ' + name + ' ',
+            afterEach : ' Compiled!'
+        }))
+
+    if (browserSyncInstances) {
+        Object.keys(browserSyncInstances).forEach(instanceKey => {
+            const instance = browserSyncInstances[instanceKey]
+
+            gulpTask.pipe(instance.stream())
+        })
+    }
+
+    return gulpTask
 }

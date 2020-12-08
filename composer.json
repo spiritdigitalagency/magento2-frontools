@@ -1,7 +1,7 @@
 {
-    "name": "spiritgr/magento2-frontools",
+    "name": "spiritgr/frontools",
     "description": "Set of front-end tools for Magento 2, based on Gulp.js",
-    "version": "1.11.2",
+    "version": "1.11.3",
     "license": "MIT",
     "type": "magento2-component"
 }
