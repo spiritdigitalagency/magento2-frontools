@@ -1,5 +1,5 @@
 {
-    "name": "vpnsak/frontools",
+    "name": "spiritgr/magento2-frontools",
     "description": "Set of front-end tools for Magento 2, based on Gulp.js",
     "version": "1.11.1",
     "license": "MIT",
