@@ -1,8 +1,8 @@
 import fs from 'fs-extra'
-import globby from 'globby'
+import { globbySync } from 'globby'
 import path from 'path'
 
-import { themes, projectPath, tempPath } from './config'
+import { themes, projectPath, tempPath } from './config.mjs'
 
 function createSymlink(srcPath, destPath) {
   fs.removeSync(destPath)
@@ -10,7 +10,7 @@ function createSymlink(srcPath, destPath) {
 }
 
 function generateSymlinks(src, dest, replacePattern, ignore = []) {
-  globby.sync(
+  globbySync(
     [src + '/**'].concat(ignore.map(pattern => '!**/' + pattern)),
     { nodir: true }
   ).forEach(srcPath => {

@@ -1,21 +1,22 @@
 import fs from 'fs-extra'
 import path from 'path'
 import chokidar from 'chokidar'
-import globby from 'globby'
+import { globbySync } from 'globby'
 import colors from 'ansi-colors'
 import log from 'fancy-log'
 
-import configLoader from '../helpers/config-loader'
-import babel from '../helpers/babel'
-import cssLint from '../helpers/css-lint'
-import dependecyTree from '../helpers/dependency-tree-builder'
-import inheritance from '../helpers/inheritance-resolver'
-import sass from '../helpers/scss'
-import sassLint from '../helpers/sass-lint'
-import svg from '../helpers/svg'
+import babel from '../helpers/babel.mjs'
+import configLoader from '../helpers/config-loader.mjs'
+import cssLint from '../helpers/css-lint.mjs'
+import dependecyTree from '../helpers/dependency-tree-builder.mjs'
+import eslint from '../helpers/eslint.mjs'
+import inheritance from '../helpers/inheritance-resolver.mjs'
+import sass from '../helpers/scss.mjs'
+import sassLint from '../helpers/sass-lint.mjs'
+import svg from '../helpers/svg.mjs'
 
-import { env, themes, tempPath, projectPath, browserSyncInstances } from '../helpers/config'
-import getThemes from '../helpers/get-themes'
+import { env, themes, tempPath, projectPath, browserSyncInstances } from '../helpers/config.mjs'
+import getThemes from '../helpers/get-themes.mjs'
 
 export const watch = () => {
   log(colors.yellow('Initializing watcher...'))
@@ -51,7 +52,7 @@ export const watch = () => {
       sassDependecyTree = {}
 
       // Find all main SASS files
-      globby.sync([
+      globbySync([
         themeTempSrc + '/**/*.scss',
         '!/**/_*.scss'
       ]).forEach(file => {
@@ -99,7 +100,7 @@ export const watch = () => {
           // Emit event on added / moved / renamed / deleted file to trigger regualr pipeline
           paths.forEach(filePath => {
             if (fs.existsSync(filePath)) {
-              globby.sync(themeTempSrc + '/**/' + path.basename(filePath))
+              globbySync(themeTempSrc + '/**/' + path.basename(filePath))
                 .forEach(file => {
                   tempWatcher.emit('change', file)
                 })
@@ -115,6 +116,20 @@ export const watch = () => {
       .on('addDir', reinitialize)
       .on('unlink', reinitialize)
       .on('unlinkDir', reinitialize)
+      .on('change', filePath => {
+        // Linters
+        if (env.disableLinting) {
+          return
+        }
+
+        if (path.extname(filePath) === '.scss') {
+          sassLint(name, filePath)
+        }
+
+        if (path.extname(filePath) === '.js') {
+          eslint(name, filePath)
+        }
+      })
 
     // print msg when temp dir watcher is initialized
     tempWatcher.on('ready', () => {
@@ -137,13 +152,6 @@ export const watch = () => {
         colors.blue(path.relative(themeTempSrc, filePath))
       )
 
-      // SASS Lint
-      if (!env.disableLinting) {
-        if (path.extname(filePath) === '.scss') {
-          sassLint(name, filePath)
-        }
-      }
-
       // SASS Compilation
       if (path.extname(filePath) === '.scss') {
         Object.keys(sassDependecyTree).forEach(file => {
@@ -154,7 +162,7 @@ export const watch = () => {
       }
 
       // Babel
-      if (path.basename(filePath).includes('.babel.js')) {
+      if (path.basename(filePath).endsWith('.babel.js')) {
         babel(name, filePath)
       }
 

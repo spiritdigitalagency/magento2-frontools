@@ -1,7 +1,7 @@
-import { src } from 'gulp'
+import gulp from 'gulp'
 import path from 'path'
 import fs from 'fs-extra'
-import globby from 'globby'
+import { globbySync } from 'globby'
 import gulpIf from 'gulp-if'
 import babel from 'gulp-babel'
 import rename from 'gulp-rename'
@@ -12,13 +12,8 @@ import notify from 'gulp-notify'
 import sourcemaps from 'gulp-sourcemaps'
 import uglify from 'gulp-uglify'
 
-import {
-  env,
-  themes,
-  tempPath,
-  projectPath,
-  browserSyncInstances
-} from './config'
+import configLoader from './config-loader.mjs'
+import { env, themes, tempPath, projectPath, browserSyncInstances } from './config.mjs'
 
 export default (name, file) => {
   const theme = themes[name]
@@ -26,11 +21,8 @@ export default (name, file) => {
   const dest = []
   const disableMaps = env.disableMaps || false
   const production = env.prod || false
-  const babelConfig = {
-    presets: [
-      require('@babel/preset-env')
-    ]
-  }
+
+  configLoader('.browserslistrc')
 
   function adjustDestinationDirectory(file) {
     file.dirname = file.dirname.replace('web/', '')
@@ -42,7 +34,7 @@ export default (name, file) => {
   })
 
   // Cleanup existing files from pub to remove symlinks
-  globby.sync(file || srcBase + '/**/*.babel.js')
+  globbySync(file || srcBase + '/**/*.babel.js')
     .forEach(file => {
       theme.locale.forEach(locale => {
         fs.removeSync(
@@ -59,7 +51,7 @@ export default (name, file) => {
       })
     })
 
-  const gulpTask = src(
+  const gulpTask = gulp.src(
     file || srcBase + '/**/*.babel.js',
     { base: srcBase }
   )
@@ -72,7 +64,7 @@ export default (name, file) => {
       )
     )
     .pipe(gulpIf(!disableMaps, sourcemaps.init()))
-    .pipe(babel(babelConfig))
+    .pipe(babel(configLoader('babel.config.json')))
     .pipe(gulpIf(production, uglify()))
     .pipe(gulpIf(production, rename({ suffix: '.min' })))
     .pipe(gulpIf(!disableMaps, sourcemaps.write('.', { includeContent: true })))

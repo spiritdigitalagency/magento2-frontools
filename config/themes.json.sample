@@ -1,36 +1,36 @@
 {
   "blank": {
-    "src": "vendor/spiritgr/theme-blank-sass",
-    "dest": "pub/static/frontend/Spirit/blank",
+    "src": "vendor/snowdog/theme-blank-sass",
+    "dest": "pub/static/frontend/Snowdog/blank",
     "locale": ["en_US"],
     "ignore": [".test"]
   },
   "basic-child": {
-    "src": "vendor/spiritgr/theme-basic-child",
-    "dest": "pub/static/frontend/Spirit/basic-child",
+    "src": "vendor/snowdog/theme-basic-child",
+    "dest": "pub/static/frontend/Snowdog/basic-child",
     "locale": ["en_US"],
     "parent": "blank"
   },
   "child-with-locale-overwrites": {
-    "src": "vendor/spiritgr/theme-custom",
-    "dest": "pub/static/frontend/Spirit/child-with-locale-overwrites",
-    "locale": ["en_US", "el_GR"],
+    "src": "vendor/snowdog/theme-custom",
+    "dest": "pub/static/frontend/Snowdog/child-with-locale-overwrites",
+    "locale": ["en_US", "pl_PL"],
     "parent": "blank"
   },
   "all-possible-options": {
-    "src": "vendor/spiritgr/theme-all-possible-options",
-    "dest": "pub/static/frontend/spiritgr/all-possible-options",
-    "locale": ["en_US", "el_GR"],
+    "src": "vendor/snowdog/theme-all-possible-options",
+    "dest": "pub/static/frontend/Snowdog/all-possible-options",
+    "locale": ["en_US", "pl_PL"],
     "parent": "blank",
     "stylesDir": "web/css",
     "includePaths": ["../../../node_modules"],
     "postcss": ["autoprefixer()"],
     "disableSuffix": true,
     "modules": {
-      "Spirit_Sample": "vendor/spiritgr/module-sample"
+      "Snowdog_Sample": "vendor/snowdog/module-sample"
     },
     "ignore": [
-      "vendor/spiritgr/module-sample/{docs,dist}/**",
+      "vendor/snowdog/module-sample/{docs,dist}/**",
       "*.xml"
     ]
   }

@@ -1,14 +1,14 @@
 {
   "name": "magento2-frontools",
-  "version": "1.11.3",
+  "version": "1.11.0",
   "author": {
-    "name": "Evangelos Pallis",
-    "email": "info.vpsnak@gmail.com"
+    "name": "Bartek Igielski",
+    "email": "igloczek@gmail.com"
   },
-  "private": false,
+  "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/spiritgr/magento2-frontools"
+    "url": "https://github.com/SnowdogApps/magento2-frontools"
   },
   "license": "MIT",
   "dependencies": {
@@ -65,7 +65,7 @@
     "clean": "gulp clean",
     "csslint": "gulp csslint",
     "default": "gulp",
-    "dev": "gulp dev",
+    "dev": "NODE_ENV=production gulp dev --disableLinting --disableMaps --disableSuffix --env=production",
     "email-fix": "gulp emailfix",
     "emailfix": "gulp emailfix",
     "eslint": "gulp eslint",
@@ -74,12 +74,12 @@
     "magepackGenerate": "gulp magepackGenerate",
     "sasslint": "gulp sasslint",
     "setup": "gulp setup",
-    "styles": "gulp styles",
+    "styles": "NODE_ENV=production gulp styles --disableLinting --disableMaps --disableSuffix --env=production",
     "svg": "gulp svg",
     "watch": "gulp watch",
     "test": "eslint *.js helpers/*.js tasks/*.js"
   },
   "engines": {
-    "node": ">=12.13.0 <13.0.0 || >=14.14.0 <15.0.0"
+    "node": ">=12.13.0 <13.0.0 || >=14.14.0 <17.0.0"
   }
 }

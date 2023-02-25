@@ -1,7 +1,8 @@
-import { src } from 'gulp'
+import gulp from 'gulp'
 import path from 'path'
 import gulpIf from 'gulp-if'
 import dartSass from 'sass'
+import nodeSass from 'node-sass'
 import gulpSass from 'gulp-sass'
 import rename from 'gulp-rename'
 import multiDest from 'gulp-multi-dest'
@@ -14,9 +15,9 @@ import autoprefixer from 'autoprefixer'
 import tailwindcss from 'tailwindcss'
 import postcss from 'gulp-postcss'
 
-import configLoader from '../helpers/config-loader'
-import sassError from './sass-error'
-import { env, themes, tempPath, projectPath, browserSyncInstances } from '../helpers/config'
+import configLoader from './config-loader.mjs'
+import sassError from './sass-error.mjs'
+import { env, themes, tempPath, projectPath, browserSyncInstances } from './config.mjs'
 
 export default function(name, file) {
   const theme = themes[name]
@@ -28,13 +29,10 @@ export default function(name, file) {
   const includePaths = theme.includePaths ? theme.includePaths : []
   const postcssConfig = []
   const disableSuffix = theme.disableSuffix || false
-  const browserslist = configLoader('browserslist.json')
   const sassCompiler = configLoader('sass-compiler.json', false)
+  const themePath = projectPath + theme.dest.replace('pub/static', 'app/design')
 
-  // Set Sass compiler to Dart Sass
-  if (sassCompiler === 'dart-sass') {
-    gulpSass.compiler = dartSass
-  }
+  configLoader('.browserslistrc')
 
   if (theme.postcss) {
     theme.postcss.forEach(el => {
@@ -42,13 +40,14 @@ export default function(name, file) {
     })
   }
   else {
-    postcssConfig.push(autoprefixer({ overrideBrowserslist: browserslist }))
+    postcssConfig.push(autoprefixer())
   }
 
     if (theme.tailwindcss) {
         const tailwindConfig = configLoader('tailwind.config.json')
         postcssConfig.push(tailwindcss({ config: tailwindConfig }))
     }
+
 
   function adjustDestinationDirectory(file) {
     if (file.dirname.startsWith(stylesDir)) {
@@ -64,7 +63,7 @@ export default function(name, file) {
     dest.push(path.join(projectPath, theme.dest, locale))
   })
 
-  const gulpTask = src( // eslint-disable-line one-var
+  const gulpTask = gulp.src( // eslint-disable-line one-var
     file || srcBase + '/**/*.scss',
     { base: srcBase }
   )
@@ -77,7 +76,8 @@ export default function(name, file) {
       )
     )
     .pipe(gulpIf(!disableMaps, sourcemaps.init()))
-    .pipe(gulpSass({ includePaths: includePaths }).on('error', sassError(env.ci || false)))
+    .pipe(gulpSass(sassCompiler === 'dart-sass' ? dartSass : nodeSass)({ includePaths: includePaths })
+      .on('error', sassError(env.ci || false)))
     .pipe(gulpIf(production, postcss([cssnano({ preset: 'default' })])))
     .pipe(gulpIf(postcssConfig.length, postcss(postcssConfig || [])))
     .pipe(gulpIf(production && !disableSuffix, rename({ suffix: '.min' })))

@@ -1,7 +1,7 @@
-import bundle from 'magepack/lib/bundle'
+import bundle from 'magepack/lib/bundle.js'
 
-import getThemes from '../helpers/get-themes'
-import { env, projectPath, themes } from '../helpers/config'
+import getThemes from '../helpers/get-themes.mjs'
+import { env, projectPath, themes } from '../helpers/config.mjs'
 
 function getThemesGlobPattern() {
   const themesNames = getThemes()
@@ -14,6 +14,10 @@ function getThemesGlobPattern() {
 }
 
 export default async function() {
+  if (!env['c'] && !env['config']) {
+    throw 'Please set the config path!'
+  }
+
   const configPath = env.c || env.config
   const themesGlobPattern = getThemesGlobPattern()
   await bundle(configPath, themesGlobPattern)
